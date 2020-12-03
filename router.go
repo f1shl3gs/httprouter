@@ -463,7 +463,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		defer r.recv(w, req)
 	}
 
-	path := req.URL.Path
+	path := req.URL.EscapedPath()
 
 	if root := r.trees[req.Method]; root != nil {
 		if handle, ps, tsr := root.getValue(path, r.getParams); handle != nil {
@@ -484,9 +484,9 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 			if tsr && r.RedirectTrailingSlash {
 				if len(path) > 1 && path[len(path)-1] == '/' {
-					req.URL.Path = path[:len(path)-1]
+					removeTrailingSlash(req)
 				} else {
-					req.URL.Path = path + "/"
+					addTrailingSlash(req)
 				}
 				http.Redirect(w, req, req.URL.String(), code)
 				return
